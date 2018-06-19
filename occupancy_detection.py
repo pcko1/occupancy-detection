@@ -36,31 +36,39 @@ y_test2 = df_test2.values[:, -1]
 clf = RandomForestClassifier(n_estimators=10,max_depth=2, random_state=0)
 clf = clf.fit(x_train,y_train)
 
-# Test the model by predicting the label of the test datasets
-y_test1_pred = clf.predict(x_test1)
-
 # Show feature importance
 importance = clf.feature_importances_
 
+# Test the model by predicting the label of the test datasets
+y_test1_pred = clf.predict(x_test1)
+y_test2_pred = clf.predict(x_test2)
+
 # Evaluate the model
 # Calculate confusion matrix
-cm = confusion_matrix(y_test1, y_test1_pred)
+cm1 = confusion_matrix(y_test1, y_test1_pred)
+cm2 = confusion_matrix(y_test2, y_test2_pred)
 
 # Calculate accuracy
-acc = accuracy_score(y_test1, y_test1_pred)
+acc1 = accuracy_score(y_test1, y_test1_pred)
+acc2 = accuracy_score(y_test2, y_test2_pred)
 
 # Calculate F1-score
-f1 = f1_score(y_test1, y_test1_pred)
+f1_t1 = f1_score(y_test1, y_test1_pred)
+f1_t2 = f1_score(y_test2, y_test2_pred)
 
 # Calculate ROC
-fpr, tpr, thresholds = roc_curve(y_test1, y_test1_pred)
+fpr1, tpr1, _ = roc_curve(y_test1, y_test1_pred)
+fpr2, tpr2, _ = roc_curve(y_test2, y_test2_pred)
 
 # Calculate AUROC
-auroc = auc(fpr,tpr)
+auroc1 = auc(fpr1,tpr1)
+auroc2 = auc(fpr2,tpr2)
 plt.figure()
 lw = 2
-plt.plot(fpr, tpr, color='darkorange',
-         lw=lw, label='ROC curve (area = %0.2f)' % auroc)
+plt.plot(fpr1, tpr1, color='green',
+         lw=lw, label='Test 1 (area = %0.2f)' % auroc1)
+plt.plot(fpr2, tpr2, color='red',
+         lw=lw, label='Test 2 (area = %0.2f)' % auroc2)
 plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])

@@ -1,13 +1,21 @@
 # occupancy-detection
 My attempt on the UCI Occupancy Detection dataset (https://archive.ics.uci.edu/ml/datasets/Occupancy+Detection+) using various methods.
 
-Scoring 98% with a Random Forest as of now.
+Scoring >98% with a Random Forest as of now.
 
 Performance metrics:
+
+**Test 1** - 2665 Samples
 
 Accuracy: 0.98
 AUC-ROC : 0.98
 F1-score: 0.97
+
+**Test 2** - 9752 Samples
+
+Accuracy: 0.99
+AUC-ROC : 0.99
+F1-score: 0.98
 
 Dataset Information:
 Three datasets are available, of which one is for training (8143 samples) and two are for testing (2665+9752 samples). 
