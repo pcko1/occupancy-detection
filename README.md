@@ -40,8 +40,8 @@ The timestamp is dropped because the algorithm already achieves very high perfor
 4. Humidity	Ratio    - 0.03  (negligible)
 5. Relative Humidity - 0.001 (negligible)
 
-## Execute the script
-```python3 occupancy_detection.py```.
+## Run
+```python3 occupancy_detection.py```
 
 ## Dependencies
 This code has been tested with the following packages:
