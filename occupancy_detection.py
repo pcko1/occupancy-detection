@@ -1,8 +1,23 @@
 from pandas import read_csv, DatetimeIndex
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, roc_curve, auc
+from sklearn.model_selection import cross_val_score, StratifiedKFold
 from matplotlib import pyplot as plt
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.metrics import binary_accuracy
+from keras.wrappers.scikit_learn import KerasClassifier
+import numpy as np
 
+
+class Performance:
+    def __init__(self, y_test, y_pred):
+        self.cm = confusion_matrix(y_test, y_pred)
+        self.acc = accuracy_score(y_test, y_pred)
+        self.f1 = f1_score(y_test, y_pred)
+        self.fpr, self.tpr, _ = roc_curve(y_test, y_pred)
+        self.auroc = auc(self.fpr,self.tpr)
+             
 # Import data from CSV/txt file as Pandas DataFrame
 def import_data(filename):
     dataset = read_csv(filename, header=0)
@@ -32,43 +47,53 @@ y_test1 = df_test1.values[:, -1]
 x_test2 = df_test2.values[:,:-1]
 y_test2 = df_test2.values[:, -1]
 
-# Train the tree
+## Train a Random Forest
 clf = RandomForestClassifier(n_estimators=10,max_depth=2, random_state=0)
 clf = clf.fit(x_train,y_train)
 
-# Show feature importance
+# Show feature importance (only for Decision Trees / Random Forests)
 importance = clf.feature_importances_
 
 # Test the model by predicting the label of the test datasets
-y_test1_pred = clf.predict(x_test1)
-y_test2_pred = clf.predict(x_test2)
+y_pred1_rf = clf.predict(x_test1)
+y_pred2_rf = clf.predict(x_test2)
+
+## Multi Layer Perceptron - Feedforward Artificial Neural Network
+# Build and train network
+def mlp_model():
+    model = Sequential()
+    model.add(Dense(100, input_dim=5, activation='relu'))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])    
+    return model
+seed = 7
+np.random.seed(seed)
+estimator = KerasClassifier(build_fn=mlp_model, epochs=10, batch_size=200, verbose=1)
+kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
+results = cross_val_score(estimator, x_train, y_train, cv=kfold)
+
+print("Results: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
+'''
+history = model.fit(x_train, y_train, epochs=10, batch_size=200, validation_data=(x_test1, y_test1), verbose=1, shuffle=False)
+# Test the network
+y_pred1_mlp = model.predict(x_test1)
+y_pred2_mlp = model.predict(x_test2)
+
 
 # Evaluate the model
-# Calculate confusion matrix
-cm1 = confusion_matrix(y_test1, y_test1_pred)
-cm2 = confusion_matrix(y_test2, y_test2_pred)
+rf1 = Performance(y_test1, y_pred1_rf)
+rf2 = Performance(y_test2, y_pred2_rf)
+mlp1 = Performance(y_test1, y_pred1_mlp)
+mlp2 = Performance(y_test1, y_pred2_mlp)
 
-# Calculate accuracy
-acc1 = accuracy_score(y_test1, y_test1_pred)
-acc2 = accuracy_score(y_test2, y_test2_pred)
-
-# Calculate F1-score
-f1_t1 = f1_score(y_test1, y_test1_pred)
-f1_t2 = f1_score(y_test2, y_test2_pred)
-
-# Calculate ROC
-fpr1, tpr1, _ = roc_curve(y_test1, y_test1_pred)
-fpr2, tpr2, _ = roc_curve(y_test2, y_test2_pred)
-
-# Calculate AUROC
-auroc1 = auc(fpr1,tpr1)
-auroc2 = auc(fpr2,tpr2)
 plt.figure()
 lw = 2
-plt.plot(fpr1, tpr1, color='green',
-         lw=lw, label='Test 1 (area = %0.2f)' % auroc1)
-plt.plot(fpr2, tpr2, color='red',
-         lw=lw, label='Test 2 (area = %0.2f)' % auroc2)
+plt.plot(rf1.fpr, rf1.tpr, color='green',
+         lw=lw, label='Test 1 (area = %0.2f)' % rf1.auroc)
+plt.plot(mlp1.fpr, mlp1.tpr, color='red',
+         lw=lw, label='mlp Test 2 (area = %0.2f)' % mlp1.auroc)
 plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
@@ -77,3 +102,4 @@ plt.ylabel('True Positive Rate')
 plt.title('Receiver Operating Characteristic')
 plt.legend(loc="lower right")
 plt.show()
+'''
