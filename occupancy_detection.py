@@ -2,10 +2,12 @@ from pandas import read_csv, DatetimeIndex
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, roc_curve, auc
 from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.utils import class_weight
 from matplotlib import pyplot as plt
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from keras.metrics import binary_accuracy
+from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from keras.wrappers.scikit_learn import KerasClassifier
 import numpy as np
 
@@ -60,27 +62,54 @@ y_pred2_rf = clf.predict(x_test2)
 
 ## Multi Layer Perceptron - Feedforward Artificial Neural Network
 # Build and train network
+dr = 0.2
 def mlp_model():
     model = Sequential()
-    model.add(Dense(100, input_dim=5, activation='relu'))
+    model.add(Dense(50, input_dim=5, activation='relu'))
+    model.add(Dropout(dr))
     model.add(Dense(50, activation='relu'))
+    model.add(Dropout(dr))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dropout(dr))
     model.add(Dense(50, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])    
     return model
 seed = 7
 np.random.seed(seed)
-estimator = KerasClassifier(build_fn=mlp_model, epochs=10, batch_size=200, verbose=1)
-kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
+estimator = KerasClassifier(build_fn=mlp_model, epochs=30, batch_size=200, verbose=0)
+'''
+kfold = StratifiedKFold(n_splits=100, shuffle=True, random_state=seed)
+
 results = cross_val_score(estimator, x_train, y_train, cv=kfold)
 
 print("Results: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
 '''
-history = model.fit(x_train, y_train, epochs=10, batch_size=200, validation_data=(x_test1, y_test1), verbose=1, shuffle=False)
+# Train the model
+class_weights = class_weight.compute_class_weight('balanced', np.unique(y_train), y_train)
+class_weights = np.array([0.1, 0.9])
+estimator.fit(x_train, y_train, epochs=30, batch_size=200, validation_data=(x_test1, y_test1), verbose=1, shuffle=False, class_weight=class_weights)
+y_pred1_mlp = estimator.predict(x_test1)
+y_pred1_mlp = y_pred1_mlp.argmax(axis=-1).astype(float)
+
+'''
+model = Sequential()
+model.add(Dense(50, input_dim=5, activation='relu'))
+model.add(Dropout(dr))
+model.add(Dense(50, activation='relu'))
+model.add(Dropout(dr))
+model.add(Dense(50, activation='relu'))
+model.add(Dropout(dr))
+model.add(Dense(50, activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])    
+
+history = model.fit(x_train, y_train, epochs=30, batch_size=200, callbacks=callback, validation_data=(x_test1, y_test1), verbose=1, shuffle=False)
 # Test the network
 y_pred1_mlp = model.predict(x_test1)
+y_pred1_mlp = y_pred1_mlp.argmax(axis=-1).astype(float)
 y_pred2_mlp = model.predict(x_test2)
-
+y_pred2_mlp = y_pred2_mlp.argmax(axis=-1).astype(float)
 
 # Evaluate the model
 rf1 = Performance(y_test1, y_pred1_rf)
