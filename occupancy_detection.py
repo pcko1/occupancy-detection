@@ -1,4 +1,4 @@
-from pandas import read_csv, DatetimeIndex
+from pandas import read_csv, DatetimeIndex, DataFrame
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, roc_curve, auc
 from sklearn.model_selection import cross_val_score, StratifiedKFold
@@ -38,6 +38,18 @@ test2_filename = 'Datasets/datatest2.txt'
 df_train = import_data(train_filename)
 df_test1 = import_data(test1_filename)
 df_test2 = import_data(test2_filename)
+
+# Creae separate files for occupied / unoccupied conditions
+occ_list, unocc_list = [], []
+
+for (idx, row) in enumerate(df_train.values):
+  if df_train.values[idx,-1]==0:
+    unocc_list.append(df_train.values[idx,:])
+  else:
+    occ_list.append(df_train.values[idx,:])
+occ_df, unocc_df = DataFrame(data=occ_list), DataFrame(data=unocc_list)
+occ_df.to_csv('Datasets/OccupiedDataset.csv')
+unocc_df.to_csv('Datasets/UnoccupiedDataset.csv')
 
 # Split predictor and target variables
 x_train = df_train.values[:,:-1]
