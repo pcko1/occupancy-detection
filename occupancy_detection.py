@@ -132,7 +132,7 @@ x_test_svm = np.asarray(x_test_svm)
 x_train_svm = np.asarray(x_train_svm)
 
 # Fit the OC-SVM
-ocsvm = svm.OneClassSVM(nu=0.1, kernel='rbf', gamma=0.3)
+ocsvm = svm.OneClassSVM(nu=1e-4, kernel='rbf', gamma=1e-7)
 ocsvm.fit(x_train_svm)
 
 # Test the OC-SVM
