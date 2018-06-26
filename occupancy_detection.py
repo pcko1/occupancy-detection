@@ -4,7 +4,6 @@ from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
 from sklearn.metrics import roc_curve, auc
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.utils import class_weight
-<<<<<<< HEAD
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn import svm
@@ -15,13 +14,6 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-=======
-from matplotlib import pyplot as plt
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
-from keras.metrics import binary_accuracy
-from keras.callbacks import ReduceLROnPlateau, EarlyStopping
->>>>>>> 78557d61ec8ffe79538bcad033255c5a4460e23d
 from keras.wrappers.scikit_learn import KerasClassifier
 
 # Evaluate the performance of a test
@@ -82,7 +74,6 @@ importance = clf.feature_importances_
 y_pred1_rf = clf.predict(x_test1)
 y_pred2_rf = clf.predict(x_test2)
 
-<<<<<<< HEAD
 # Multi Layer Perceptron - Feedforward Artificial Neural Network
 # Network Topology
 def mlp_model():
@@ -93,19 +84,6 @@ def mlp_model():
     model.add(Dropout(0.2))
     model.add(Dense(50, activation='relu'))
     model.add(Dropout(0.2))
-=======
-## Multi Layer Perceptron - Feedforward Artificial Neural Network
-# Build and train network
-dr = 0.2
-def mlp_model():
-    model = Sequential()
-    model.add(Dense(50, input_dim=5, activation='relu'))
-    model.add(Dropout(dr))
-    model.add(Dense(50, activation='relu'))
-    model.add(Dropout(dr))
-    model.add(Dense(50, activation='relu'))
-    model.add(Dropout(dr))
->>>>>>> 78557d61ec8ffe79538bcad033255c5a4460e23d
     model.add(Dense(50, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', 
@@ -131,7 +109,6 @@ pipeline = Pipeline(estimator)
 # Stratified k-fold validation to see how model scores on unseen data
 seed = 7
 np.random.seed(seed)
-<<<<<<< HEAD
 kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
 results = cross_val_score(pipeline, x_train, y_train, cv=kfold)
 print("Results: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
@@ -159,41 +136,6 @@ x_train_svm = np.asarray(x_train_svm)
 # Fit the OC-SVM
 ocsvm = svm.OneClassSVM(nu=0.1, kernel='rbf', gamma=0.1)
 ocsvm.fit(x_train_svm)
-=======
-estimator = KerasClassifier(build_fn=mlp_model, epochs=30, batch_size=200, verbose=0)
-'''
-kfold = StratifiedKFold(n_splits=100, shuffle=True, random_state=seed)
-
-results = cross_val_score(estimator, x_train, y_train, cv=kfold)
-
-print("Results: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
-'''
-# Train the model
-class_weights = class_weight.compute_class_weight('balanced', np.unique(y_train), y_train)
-class_weights = np.array([0.1, 0.9])
-estimator.fit(x_train, y_train, epochs=30, batch_size=200, validation_data=(x_test1, y_test1), verbose=1, shuffle=False, class_weight=class_weights)
-y_pred1_mlp = estimator.predict(x_test1)
-y_pred1_mlp = y_pred1_mlp.argmax(axis=-1).astype(float)
-
-'''
-model = Sequential()
-model.add(Dense(50, input_dim=5, activation='relu'))
-model.add(Dropout(dr))
-model.add(Dense(50, activation='relu'))
-model.add(Dropout(dr))
-model.add(Dense(50, activation='relu'))
-model.add(Dropout(dr))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(1, activation='sigmoid'))
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])    
-
-history = model.fit(x_train, y_train, epochs=30, batch_size=200, callbacks=callback, validation_data=(x_test1, y_test1), verbose=1, shuffle=False)
-# Test the network
-y_pred1_mlp = model.predict(x_test1)
-y_pred1_mlp = y_pred1_mlp.argmax(axis=-1).astype(float)
-y_pred2_mlp = model.predict(x_test2)
-y_pred2_mlp = y_pred2_mlp.argmax(axis=-1).astype(float)
->>>>>>> 78557d61ec8ffe79538bcad033255c5a4460e23d
 
 # Test the OC-SVM
 y_pred1_ocsvm = ocsvm.predict(x_train_svm)
