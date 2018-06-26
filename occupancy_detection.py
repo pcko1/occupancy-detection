@@ -8,8 +8,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn import svm
 import numpy as np
-import matplotlib
-matplotlib.use('Agg') #Use this backend to save figs without showing
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from keras.models import Sequential
@@ -42,7 +40,7 @@ def autolabel(rects):
     for rect in rects:
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width()/2., 1.05*height,
-                '%.2f' % height,
+                '%.3f' % height,
                 ha='center', va='bottom')
 
 # Define filenames
@@ -98,7 +96,7 @@ class_weights = class_weight.compute_class_weight('balanced',
 estimator = []
 estimator.append(('standardize', StandardScaler()))
 estimator.append(('mlp', KerasClassifier(build_fn=mlp_model, 
-                                         epochs=1, 
+                                         epochs=2, 
                                          batch_size=50, 
                                          verbose=1, 
                                          class_weight=class_weights)))
@@ -134,7 +132,7 @@ x_test_svm = np.asarray(x_test_svm)
 x_train_svm = np.asarray(x_train_svm)
 
 # Fit the OC-SVM
-ocsvm = svm.OneClassSVM(nu=0.1, kernel='rbf', gamma=0.1)
+ocsvm = svm.OneClassSVM(nu=0.1, kernel='rbf', gamma=0.3)
 ocsvm.fit(x_train_svm)
 
 # Test the OC-SVM
