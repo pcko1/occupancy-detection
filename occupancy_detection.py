@@ -1,17 +1,30 @@
 from pandas import read_csv, DatetimeIndex
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, roc_curve, auc
+from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
+from sklearn.metrics import roc_curve, auc
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.utils import class_weight
+<<<<<<< HEAD
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn import svm
+import numpy as np
+import matplotlib
+matplotlib.use('Agg') #Use this backend to save figs without showing
+import matplotlib.pyplot as plt
+import matplotlib.font_manager
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+=======
 from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.metrics import binary_accuracy
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
+>>>>>>> 78557d61ec8ffe79538bcad033255c5a4460e23d
 from keras.wrappers.scikit_learn import KerasClassifier
-import numpy as np
 
-
+# Evaluate the performance of a test
 class Performance:
     def __init__(self, y_test, y_pred):
         self.cm = confusion_matrix(y_test, y_pred)
@@ -32,6 +45,15 @@ def import_data(filename):
         print('Dataset has NaN values, action required.')
     return dataset
 
+# Show the height value above each bar of a barchart
+def autolabel(rects):
+    for rect in rects:
+        height = rect.get_height()
+        ax.text(rect.get_x() + rect.get_width()/2., 1.05*height,
+                '%.2f' % height,
+                ha='center', va='bottom')
+
+# Define filenames
 train_filename = 'Datasets/datatraining.txt'
 test1_filename = 'Datasets/datatest.txt'
 test2_filename = 'Datasets/datatest2.txt'
@@ -49,8 +71,8 @@ y_test1 = df_test1.values[:, -1]
 x_test2 = df_test2.values[:,:-1]
 y_test2 = df_test2.values[:, -1]
 
-## Train a Random Forest
-clf = RandomForestClassifier(n_estimators=10,max_depth=2, random_state=0)
+# Train a Random Forest
+clf = RandomForestClassifier(n_estimators=10, max_depth=2, random_state=0)
 clf = clf.fit(x_train,y_train)
 
 # Show feature importance (only for Decision Trees / Random Forests)
@@ -60,6 +82,18 @@ importance = clf.feature_importances_
 y_pred1_rf = clf.predict(x_test1)
 y_pred2_rf = clf.predict(x_test2)
 
+<<<<<<< HEAD
+# Multi Layer Perceptron - Feedforward Artificial Neural Network
+# Network Topology
+def mlp_model():
+    model = Sequential()
+    model.add(Dense(50, input_dim=5, activation='relu'))
+    model.add(Dropout(0.2))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dropout(0.2))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dropout(0.2))
+=======
 ## Multi Layer Perceptron - Feedforward Artificial Neural Network
 # Build and train network
 dr = 0.2
@@ -71,12 +105,61 @@ def mlp_model():
     model.add(Dropout(dr))
     model.add(Dense(50, activation='relu'))
     model.add(Dropout(dr))
+>>>>>>> 78557d61ec8ffe79538bcad033255c5a4460e23d
     model.add(Dense(50, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])    
+    model.compile(loss='binary_crossentropy', 
+                  optimizer='adam', 
+                  metrics=['accuracy'])    
     return model
+
+# Add weights to classes
+class_weights = class_weight.compute_class_weight('balanced', 
+                                                  np.unique(y_train), 
+                                                  y_train)
+estimator = []
+estimator.append(('standardize', StandardScaler()))
+estimator.append(('mlp', KerasClassifier(build_fn=mlp_model, 
+                                         epochs=1, 
+                                         batch_size=50, 
+                                         verbose=1, 
+                                         class_weight=class_weights)))
+# Pipeline of transforms and estimators
+pipeline = Pipeline(estimator)
+
+''' Takes time to run because it trains 10 different models
+# Stratified k-fold validation to see how model scores on unseen data
 seed = 7
 np.random.seed(seed)
+<<<<<<< HEAD
+kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
+results = cross_val_score(pipeline, x_train, y_train, cv=kfold)
+print("Results: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
+'''
+
+# Train the network
+pipeline.fit(x_train, y_train)
+
+# Test the network
+y_pred1_mlp = pipeline.predict(x_test1)
+y_pred2_mlp = pipeline.predict(x_test2)
+
+# Prepare the data for One-Class SVM (semi-supervised)
+x_train_svm = []
+x_test_svm = []
+
+for row in df_train.values:
+    if row[-1] == 1: #occupied
+        x_test_svm.append(row[0:5])
+    else: #unoccupied
+        x_train_svm.append(row[0:5])
+x_test_svm = np.asarray(x_test_svm)
+x_train_svm = np.asarray(x_train_svm)
+
+# Fit the OC-SVM
+ocsvm = svm.OneClassSVM(nu=0.1, kernel='rbf', gamma=0.1)
+ocsvm.fit(x_train_svm)
+=======
 estimator = KerasClassifier(build_fn=mlp_model, epochs=30, batch_size=200, verbose=0)
 '''
 kfold = StratifiedKFold(n_splits=100, shuffle=True, random_state=seed)
@@ -110,19 +193,69 @@ y_pred1_mlp = model.predict(x_test1)
 y_pred1_mlp = y_pred1_mlp.argmax(axis=-1).astype(float)
 y_pred2_mlp = model.predict(x_test2)
 y_pred2_mlp = y_pred2_mlp.argmax(axis=-1).astype(float)
+>>>>>>> 78557d61ec8ffe79538bcad033255c5a4460e23d
 
-# Evaluate the model
+# Test the OC-SVM
+y_pred1_ocsvm = ocsvm.predict(x_train_svm)
+y_pred2_ocsvm = ocsvm.predict(x_test_svm)
+n_error_train = y_pred1_ocsvm[y_pred1_ocsvm == -1].size
+n_error_test = y_pred2_ocsvm[y_pred2_ocsvm == -1].size
+
+
+## Results
+# Evaluate all models on all test datasets
 rf1 = Performance(y_test1, y_pred1_rf)
 rf2 = Performance(y_test2, y_pred2_rf)
 mlp1 = Performance(y_test1, y_pred1_mlp)
-mlp2 = Performance(y_test1, y_pred2_mlp)
+mlp2 = Performance(y_test2, y_pred2_mlp)
 
-plt.figure()
+# Accuracy
+fig, ax = plt.subplots(dpi=600)
+ind = np.arange(2)
+width = 0.35
+acc_rf = (rf1.acc, rf2.acc)
+bars_rf = ax.bar(ind, acc_rf, width, color='r')
+acc_mlp = (mlp1.acc, mlp2.acc)
+bars_mlp = ax.bar(ind + width, acc_mlp, width, color='y')
+ax.set_ylim([0, 1.1])
+ax.set_ylabel('Accuracy')
+ax.set_title('Occupancy Detection Accuracy')
+ax.set_xticks(ind + width / 2)
+ax.set_xticklabels(('Test 1', 'Test 2'))
+ax.legend((bars_rf[0], bars_mlp[0]), ('RF', 'MLP'), loc='upper center')
+autolabel(bars_rf)
+autolabel(bars_mlp)
+plt.savefig('Results/Accuracy.png')
+
+# F1 Score
+fig, ax = plt.subplots(dpi=600)
+ind = np.arange(2)
+width = 0.35
+f1_rf = (rf1.f1, rf2.f1)
+bars_rf = ax.bar(ind, f1_rf, width, color='r')
+f1_mlp = (mlp1.f1, mlp2.f1)
+bars_mlp = ax.bar(ind + width, f1_mlp, width, color='y')
+ax.set_ylim([0, 1.1])
+ax.set_ylabel('F1 Score')
+ax.set_title('F1 Score of Detectors')
+ax.set_xticks(ind + width / 2)
+ax.set_xticklabels(('Test 1', 'Test 2'))
+ax.legend((bars_rf[0], bars_mlp[0]), ('RF', 'MLP'), loc='upper center')
+autolabel(bars_rf)
+autolabel(bars_mlp)
+plt.savefig('Results/F1-Score.png')
+
+# AUROC
+plt.figure(figsize=(10,5), dpi=600)
 lw = 2
 plt.plot(rf1.fpr, rf1.tpr, color='green',
-         lw=lw, label='Test 1 (area = %0.2f)' % rf1.auroc)
-plt.plot(mlp1.fpr, mlp1.tpr, color='red',
-         lw=lw, label='mlp Test 2 (area = %0.2f)' % mlp1.auroc)
+         lw=lw, label='RF - Test 1 (area = %0.2f)' % rf1.auroc)
+plt.plot(rf2.fpr, rf2.tpr, color='red',
+         lw=lw, label='RF - Test 2 (area = %0.2f)' % rf2.auroc)
+plt.plot(mlp1.fpr, mlp1.tpr, color='cyan',
+         lw=lw, label='MLP - Test 1 (area = %0.2f)' % mlp1.auroc)
+plt.plot(mlp2.fpr, mlp2.tpr, color='magenta',
+         lw=lw, label='MLP - Test 2 (area = %0.2f)' % mlp2.auroc)
 plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
@@ -130,5 +263,4 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('Receiver Operating Characteristic')
 plt.legend(loc="lower right")
-plt.show()
-'''
+plt.savefig('Results/AUROC.png')
