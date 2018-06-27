@@ -18,9 +18,9 @@ My attempt on the [UCI Occupancy Detection](https://archive.ics.uci.edu/ml/datas
 ## Dataset Information:
 Three datasets are available:
 
-### Train Dataset (8143 Samples, 79% Class Balance)
-### Test1 Dataset (2665 Samples, 64% Class Balance)
-### Test2 Dataset (9752 Samples, 79% Class Balance)
+* Train Dataset (8143 Samples, 79% Class Balance)
+* Test1 Dataset (2665 Samples, 64% Class Balance)
+* Test2 Dataset (9752 Samples, 79% Class Balance)
 
 There are 7 attributes in total, including the occupancy label.
 
