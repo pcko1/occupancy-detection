@@ -1,28 +1,28 @@
 # occupancy-detection
-My attempt on the UCI Occupancy Detection dataset (https://archive.ics.uci.edu/ml/datasets/Occupancy+Detection+) using various methods.
+My attempt on the [UCI Occupancy Detection](https://archive.ics.uci.edu/ml/datasets/Occupancy+Detection+) dataset using various methods.
 
-Scoring >98% with a Random Forest as of now.
+**Scoring >98% with a Random Forest and a Deep Feed-forward Neural Network (MLP) as of now.**
+
+## Tested Methods
+* Random Forest (RF), Supervised Learning
+* Multi-Layer Perceptron (ANN) with weighted classes and dropout, Supervised Learning
+* One-Class Support Vector Machine (OC-SVM) with polynomial kernel, Semi-Supervised Learning
+
 
 ## Performance metrics:
 
-### Test 1 - 2665 Samples
-
-Accuracy: 0.98
-
-AUC-ROC : 0.98
-
-F1-score: 0.97
-
-### Test 2 - 9752 Samples
-
-Accuracy: 0.99
-
-AUC-ROC : 0.99
-
-F1-score: 0.98
+### Accuracy
+### [F1-Score](https://en.wikipedia.org/wiki/F1_score)
+### Area-Under-[ROC](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) (AUROC)
 
 ## Dataset Information:
-Three datasets are available, of which one is for training (8143 samples) and two are for testing (2665+9752 samples). There are 7 attributes in total, including the occupancy label.
+Three datasets are available:
+
+### Train Dataset (8143 Samples, 79% Class Balance)
+### Test1 Dataset (2665 Samples, 64% Class Balance)
+### Test2 Dataset (9752 Samples, 79% Class Balance)
+
+There are 7 attributes in total, including the occupancy label.
 
 The timestamp is dropped because the algorithm already achieves very high performance, so only minor improvements are expected by incorporating it into the model.
 
@@ -49,9 +49,9 @@ The timestamp is dropped because the algorithm already achieves very high perfor
 ```python3 occupancy_detection.py```
 
 ## Dependencies
-This code has been developed with the following packages:
-* matplotlib v2.2.2
-* sklearn v0.19.1
-* pandas v0.22.0
-* keras v2.1.6
-* tensorflow v1.7.0
+This code has been developed in ```python 3.6.5``` with the following packages:
+* ```matplotlib v2.2.2```
+* ```sklearn v0.19.1```
+* ```pandas v0.22.0```
+* ```keras v2.1.6```
+* ```tensorflow v1.7.0```
