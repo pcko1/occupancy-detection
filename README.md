@@ -60,3 +60,5 @@ This code has been developed in ```python 3.6.5``` with the following packages:
 * ```pandas v0.22.0```
 * ```keras v2.1.6```
 * ```tensorflow v1.7.0```
+* ```graphviz v0.8.3``` (to visualize MLP)
+* ```pydot v1.2.4``` (to visualize MLP)
