@@ -13,6 +13,7 @@ import matplotlib.font_manager
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.wrappers.scikit_learn import KerasClassifier
+from keras.utils import plot_model
 
 # Evaluate the performance of a test
 class Performance:
@@ -79,14 +80,11 @@ def mlp_model():
     model.add(Dense(50, input_dim=5, activation='relu'))
     model.add(Dropout(0.2))
     model.add(Dense(50, activation='relu'))
-    model.add(Dropout(0.2))
-    model.add(Dense(50, activation='relu'))
-    model.add(Dropout(0.2))
-    model.add(Dense(50, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', 
                   optimizer='adam', 
-                  metrics=['accuracy'])    
+                  metrics=['accuracy']) 
+    plot_model(model, to_file='Results/MLP_Model.png', show_shapes = True, show_layer_names = True)
     return model
 
 # Add weights to classes
