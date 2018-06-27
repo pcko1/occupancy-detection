@@ -4,7 +4,7 @@ from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
 from sklearn.metrics import roc_curve, auc
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.utils import class_weight
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.pipeline import Pipeline
 from sklearn import svm
 import numpy as np
@@ -125,22 +125,26 @@ x_test_svm = []
 
 for row in df_train.values:
     if row[-1] == 1: #occupied
-        x_test_svm.append(row[0:5])
-    else: #unoccupied
         x_train_svm.append(row[0:5])
+    else: #unoccupied
+        x_test_svm.append(row[0:5])
+
 x_test_svm = np.asarray(x_test_svm)
 x_train_svm = np.asarray(x_train_svm)
 
-# Fit the OC-SVM
-ocsvm = svm.OneClassSVM(nu=1e-4, kernel='rbf', gamma=1e-7)
+# Train the OC-SVM on *OCCUPIED* data
+ocsvm = svm.OneClassSVM(nu=0.01, kernel='poly', gamma=0.3, degree=2)
 ocsvm.fit(x_train_svm)
 
 # Test the OC-SVM
-y_pred1_ocsvm = ocsvm.predict(x_train_svm)
-y_pred2_ocsvm = ocsvm.predict(x_test_svm)
-n_error_train = y_pred1_ocsvm[y_pred1_ocsvm == -1].size
-n_error_test = y_pred2_ocsvm[y_pred2_ocsvm == -1].size
+y_pred1_ocsvm = ocsvm.predict(x_test1)
+y_pred2_ocsvm = ocsvm.predict(x_test2)
 
+# Map OCSVM output from [-1,1] to [0,1] for compatibility
+label_encoder = LabelEncoder()
+label_encoder.fit([-1,1])
+y_pred1_ocsvm = label_encoder.transform(y_pred1_ocsvm) 
+y_pred2_ocsvm = label_encoder.transform(y_pred2_ocsvm)
 
 ## Results
 # Evaluate all models on all test datasets
@@ -148,59 +152,84 @@ rf1 = Performance(y_test1, y_pred1_rf)
 rf2 = Performance(y_test2, y_pred2_rf)
 mlp1 = Performance(y_test1, y_pred1_mlp)
 mlp2 = Performance(y_test2, y_pred2_mlp)
+ocsvm1 = Performance(y_test1, y_pred1_ocsvm)
+ocsvm2 = Performance(y_test2, y_pred2_ocsvm)
 
 # Accuracy
 fig, ax = plt.subplots(dpi=600)
 ind = np.arange(2)
-width = 0.35
+width = 0.15
 acc_rf = (rf1.acc, rf2.acc)
 bars_rf = ax.bar(ind, acc_rf, width, color='r')
 acc_mlp = (mlp1.acc, mlp2.acc)
 bars_mlp = ax.bar(ind + width, acc_mlp, width, color='y')
+acc_ocsvm = (ocsvm1.acc, ocsvm2.acc)
+bars_ocsvm = ax.bar(ind + 2*width, acc_ocsvm, width, color='g')
 ax.set_ylim([0, 1.1])
 ax.set_ylabel('Accuracy')
 ax.set_title('Occupancy Detection Accuracy')
-ax.set_xticks(ind + width / 2)
+ax.set_xticks(ind + width)
 ax.set_xticklabels(('Test 1', 'Test 2'))
-ax.legend((bars_rf[0], bars_mlp[0]), ('RF', 'MLP'), loc='upper center')
+ax.legend((bars_rf[0], bars_mlp[0], bars_ocsvm[0]), 
+          ('RF', 'MLP', 'OCSVM'), loc='upper center')
 autolabel(bars_rf)
 autolabel(bars_mlp)
+autolabel(bars_ocsvm)
 plt.savefig('Results/Accuracy.png')
 
 # F1 Score
 fig, ax = plt.subplots(dpi=600)
 ind = np.arange(2)
-width = 0.35
+width = 0.15
 f1_rf = (rf1.f1, rf2.f1)
 bars_rf = ax.bar(ind, f1_rf, width, color='r')
 f1_mlp = (mlp1.f1, mlp2.f1)
 bars_mlp = ax.bar(ind + width, f1_mlp, width, color='y')
+f1_ocsvm = (ocsvm1.f1, ocsvm2.f1)
+bars_ocsvm = ax.bar(ind + 2*width, f1_ocsvm, width, color='g')
 ax.set_ylim([0, 1.1])
 ax.set_ylabel('F1 Score')
 ax.set_title('F1 Score of Detectors')
-ax.set_xticks(ind + width / 2)
+ax.set_xticks(ind + width)
 ax.set_xticklabels(('Test 1', 'Test 2'))
-ax.legend((bars_rf[0], bars_mlp[0]), ('RF', 'MLP'), loc='upper center')
+ax.legend((bars_rf[0], bars_mlp[0], bars_ocsvm[0]), 
+          ('RF', 'MLP', 'OCSVM'), loc='upper center')
 autolabel(bars_rf)
 autolabel(bars_mlp)
+autolabel(bars_ocsvm)
 plt.savefig('Results/F1-Score.png')
 
 # AUROC
 plt.figure(figsize=(10,5), dpi=600)
 lw = 2
-plt.plot(rf1.fpr, rf1.tpr, color='green',
-         lw=lw, label='RF - Test 1 (area = %0.2f)' % rf1.auroc)
-plt.plot(rf2.fpr, rf2.tpr, color='red',
-         lw=lw, label='RF - Test 2 (area = %0.2f)' % rf2.auroc)
-plt.plot(mlp1.fpr, mlp1.tpr, color='cyan',
-         lw=lw, label='MLP - Test 1 (area = %0.2f)' % mlp1.auroc)
-plt.plot(mlp2.fpr, mlp2.tpr, color='magenta',
-         lw=lw, label='MLP - Test 2 (area = %0.2f)' % mlp2.auroc)
-plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
+# Test 1
+plt.subplot(211)
+plt.plot(rf1.fpr, rf1.tpr, color='red',
+         lw=lw, label='RF - Test 1 (area = %0.2f)' % rf1.auroc)
+plt.plot(mlp1.fpr, mlp1.tpr, color='green',
+         lw=lw, label='MLP - Test 1 (area = %0.2f)' % mlp1.auroc)
+plt.plot(ocsvm1.fpr, ocsvm1.tpr, color='blue',
+         lw=lw, label='OCSVM - Test 1 (area = %0.2f)' % ocsvm1.auroc)
+plt.plot([0, 1], [0, 1], color='black', lw=lw, linestyle='--')
+plt.annotate('Overlapping!', 
+             xy=(0.014, 0.6), 
+             arrowprops=dict(arrowstyle='->'), 
+             xytext=(0.2, 0.7))
+plt.title('Receiver Operating Characteristic')
+plt.ylabel('True Positive Rate')
+plt.legend(loc="lower right")
+# Test 2
+plt.subplot(212)
+plt.plot(rf2.fpr, rf2.tpr, color='red',
+         lw=lw, label='RF - Test 2 (area = %0.2f)' % rf2.auroc)
+plt.plot(mlp2.fpr, mlp2.tpr, color='green',
+         lw=lw, label='MLP - Test 2 (area = %0.2f)' % mlp2.auroc)
+plt.plot(ocsvm2.fpr, ocsvm2.tpr, color='blue',
+         lw=lw, label='OCSVM - Test 2 (area = %0.2f)' % ocsvm2.auroc)
+plt.plot([0, 1], [0, 1], color='black', lw=lw, linestyle='--')
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
-plt.title('Receiver Operating Characteristic')
 plt.legend(loc="lower right")
 plt.savefig('Results/AUROC.png')
