@@ -33,18 +33,25 @@ The timestamp is dropped because the algorithm already achieves very high perfor
 4. **Humidity Ratio** - No unit. Derived quantity from temperature and relative humidity, in kgwater-vapor/kg-air 
 5. **Relative Humidity** - %
 
-## Attribute Importance (based on Gini Impurity):
+## Attribute Importance (based on Gini Impurity of the Random Forest):
 1. Light - 0.55
 2. CO2 - 0.23
 3. Temperature - 0.18
 4. Humidity Ratio - 0.03  (negligible)
 5. Relative Humidity - 0.001 (negligible)
 
+## Results
+![Accuracy](Results/Accuracy.png)
+![F1-Score](Results/F1-Score.png)
+![AUROC](Results/AUROC.png)
+
 ## Run
 ```python3 occupancy_detection.py```
 
 ## Dependencies
-This code has been tested with the following packages:
+This code has been developed with the following packages:
 * matplotlib v2.2.2
 * sklearn v0.19.1
 * pandas v0.22.0
+* keras v2.1.6
+* tensorflow v1.7.0
