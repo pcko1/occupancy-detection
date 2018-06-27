@@ -11,9 +11,9 @@ My attempt on the [UCI Occupancy Detection](https://archive.ics.uci.edu/ml/datas
 
 ## Performance metrics:
 
-### Accuracy
-### [F1-Score](https://en.wikipedia.org/wiki/F1_score)
-### Area-Under-[ROC](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) (AUROC)
+* Accuracy
+* [F1-Score](https://en.wikipedia.org/wiki/F1_score)
+* Area-Under-[ROC](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) (AUROC)
 
 ## Dataset Information:
 Three datasets are available:
