@@ -80,7 +80,7 @@ def mlp_model():
     model.add(Dense(50, input_dim=5, activation='relu'))
     model.add(Dropout(0.2))
     model.add(Dense(50, activation='relu'))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.2)) 
     model.add(Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', 
                   optimizer='adam', 
