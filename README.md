@@ -40,6 +40,11 @@ The timestamp is dropped because the algorithm already achieves very high perfor
 4. Humidity Ratio - 0.03  (negligible)
 5. Relative Humidity - 0.001 (negligible)
 
+## MLP Network Topology
+<p align="center">
+  <img src="Results/MLP_Model.png" alt="MLP"/>
+</p>
+
 ## Results
 ![Accuracy](Results/Accuracy.png)
 ![F1-Score](Results/F1-Score.png)
